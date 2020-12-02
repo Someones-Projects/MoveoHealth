@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item android:state_pressed="true" >
+        <shape android:shape="rectangle"  >
+            <corners android:radius="180dp" />
+            <!--<stroke android:width="1dip" android:color="#5e7974" />-->
+            <solid
+                android:color="#4577B3"/>
+            <size
+                android:width="120dp"
+                android:height="@dimen/height_login_button"/>
+        </shape>
+    </item>
+    <item >
+        <shape android:shape="rectangle"  >
+            <corners android:radius="180dp" />
+            <!--<stroke android:width="1dip" android:color="#5e7974" />-->
+            <solid
+                android:color="#5F96DC"/>
+            <size
+                android:width="120dp"
+                android:height="@dimen/height_login_button"/>
+        </shape>
+    </item>
+</selector>

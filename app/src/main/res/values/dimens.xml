@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="input_fields_layout_margin">20dp</dimen>
+    <dimen name="margin_top_text_input_layout_login">10dp</dimen>
+    <dimen name="height_login_button">48dp</dimen>
+    <dimen name="app_bar_height">180dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="text_margin">16dp</dimen>
+    <dimen name="margin_recycler_view_item">7dp</dimen>
+</resources>

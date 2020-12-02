@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.auth.RegisterFragment"
+    android:fillViewport="true">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <include
+            android:id="@+id/registration_fields_container"
+            layout="@layout/registration_fields_inputs" />
+
+        <include
+            android:id="@+id/confirm_email_sent_container"
+            layout="@layout/layout_verification_email_sent_message" />
+
+    </FrameLayout>
+
+</androidx.core.widget.NestedScrollView>
+

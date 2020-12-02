@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+
+    <!-- ###########  Title Appbar theme style  ###########  -->
+    <style name="AppBarTitleExpandLogin" parent="Theme.MoveoHealth">
+        <item name="android:textSize">40sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="AppBarTitleCollapsedLogin" parent="Theme.MoveoHealth">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+</resources>

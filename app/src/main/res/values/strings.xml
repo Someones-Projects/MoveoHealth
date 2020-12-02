@@ -1,0 +1,36 @@
+<resources>
+
+    <string name="app_name">MoveoHealth</string>
+
+    <string name="text_error">Error</string>
+    <string name="text_success">Success</string>
+    <string name="text_ok">OK</string>
+    <string name="text_cancel">Cancel</string>
+    <string name="text_info">Info</string>
+    <string name="are_you_sure">Are you sure?</string>
+    <string name="or_sign_up">Or Sign Up</string>
+    <string name="text_login">Login</string>
+    <string name="forgot_password_question">Forgot password?</string>
+    <string name="field_password">Password</string>
+    <string name="email_field">Email</string>
+    <string name="welcome">Welcome</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="field_confirm_password">Confirm password</string>
+    <string name="registration_password_constraints">* Password must contain at least 6 characters</string>
+    <string name="confirm_email_sent_info">we\'ve emailed you instructions for activating your account.
+        \nIf you won\'t receive an email shortly, please make sure you\'ve entered your correct email address,
+        and check your spam folder.
+    </string>
+    <string name="return_to_launcher_fragment">Return</string>
+    <string name="confirm_email_address_sent">Verification email sent to:\n %1$s</string>
+    <string name="doctor">Doctor</string>
+    <string name="patient">Patient</string>
+    <string name="login_as">Login as:</string>
+    <string name="sign_up_as">Sign Up as:</string>
+    <string name="next_patient">Next patient</string>
+    <string name="alert_get_next_patient">Finish current session and get next patient?</string>
+    <string name="get_next">Get next</string>
+    <string name="username">Username</string>
+
+
+</resources>

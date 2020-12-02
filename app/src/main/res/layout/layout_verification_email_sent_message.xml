@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_marginTop="30dp"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:visibility="invisible"
+    tools:showIn="@layout/fragment_register">
+
+    <TextView
+        android:id="@+id/confirm_email_sent_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center"
+        android:lineSpacingExtra="8dp"
+        android:textSize="24sp" />
+
+    <TextView
+        android:id="@+id/confirm_email_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:padding="16dp"
+        android:layout_marginTop="26dp"
+        android:text="@string/confirm_email_sent_info"
+        android:textSize="16sp" />
+
+    <com.google.android.material.button.MaterialButton
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:id="@+id/return_to_launcher_fragment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="50dp"
+        android:text="@string/return_to_launcher_fragment"
+        android:textAllCaps="false"
+        android:letterSpacing="0.02"
+        android:textColor="@color/blue_app_theme"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:cornerRadius="90dp"
+        />
+
+</LinearLayout>

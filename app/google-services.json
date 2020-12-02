@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "612994656744",
+    "firebase_url": "https://moveohealth.firebaseio.com",
+    "project_id": "moveohealth",
+    "storage_bucket": "moveohealth.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:612994656744:android:5344c1c0352c1f0f3a1c5d",
+        "android_client_info": {
+          "package_name": "com.example.moveohealth"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "612994656744-78s8b9c39erdue9n1p7nhsod1imn37e4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCxl2iFy5t9B_Di2vL-tgI-QYI5RoYcdVE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "612994656744-78s8b9c39erdue9n1p7nhsod1imn37e4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
