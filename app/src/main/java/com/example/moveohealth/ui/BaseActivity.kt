@@ -13,7 +13,8 @@ import javax.inject.Inject
 
 abstract class BaseActivity: AppCompatActivity(),
     DataStateChangeListener,
-    UICommunicationListener
+    UICommunicationListener,
+        ToolbarInteraction
 {
 
     @Inject

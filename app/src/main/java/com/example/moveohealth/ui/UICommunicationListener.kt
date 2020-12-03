@@ -13,5 +13,4 @@ interface UICommunicationListener {
 
     fun showProgressBar(show: Boolean)
 
-
 }

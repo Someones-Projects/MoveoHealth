@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/text_doctor_current_patient"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="56dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            android:gravity="center_vertical"
+            android:textSize="26sp"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/text_list_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            android:layout_below="@+id/text_doctor_current_patient"
+            android:gravity="center_vertical"
+            android:textSize="26sp" />
+
+        <ImageView
+            android:id="@+id/icon_sort_doctors"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignTop="@+id/text_list_header"
+            android:layout_alignBottom="@+id/text_list_header"
+            android:visibility="invisible"
+            android:src="@drawable/ic_filter_list_24"/>
+
+        <TextView
+            android:id="@+id/text_no_data"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/text_list_header"
+            android:layout_marginTop="140dp"
+            android:layout_centerHorizontal="true"
+            android:gravity="center"
+            android:text="No data"
+            android:textSize="26sp"
+            android:visibility="invisible" />
+
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/text_list_header"
+            android:visibility="invisible"/>
+
+    </RelativeLayout>
+
+</androidx.core.widget.NestedScrollView>

@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.liveData
+import com.example.moveohealth.model.User
 import com.example.moveohealth.model.UserType
 import com.example.moveohealth.repository.AuthRepository
 import com.example.moveohealth.ui.BaseViewModel
@@ -16,7 +17,6 @@ import com.example.moveohealth.ui.auth.state.AuthStateEvent.*
 import com.example.moveohealth.ui.auth.state.AuthViewState
 import com.example.moveohealth.ui.auth.state.LoginFields
 import com.example.moveohealth.ui.auth.state.RegistrationFields
-import com.google.firebase.auth.FirebaseUser
 
 
 class AuthViewModel
@@ -96,7 +96,7 @@ constructor(
 //        authRepository.cancelActiveJobs()
     }
 
-    fun setUserViewState(user: FirebaseUser?) {
+    fun setUserViewState(user: User?) {
         val update = getCurrentViewStateOrNew()
         if (update.user != user) {
             update.user = user

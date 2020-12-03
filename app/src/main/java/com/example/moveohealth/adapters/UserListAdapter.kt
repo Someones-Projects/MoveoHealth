@@ -3,14 +3,22 @@ package com.example.moveohealth.adapters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.*
 import com.example.moveohealth.R
 import com.example.moveohealth.model.User
+import com.example.moveohealth.model.UserType
 import kotlinx.android.synthetic.main.adapter_user_list_item.view.*
 
-class UserListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class UserListAdapter(
+    private val patientId: String?
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    var onItemClick: ((User) -> Unit)? = null
+    var onClickStart: ((User) -> Unit)? = null
+    var onClickDone: ((User) -> Unit)? = null
+    var onClickAddWaiting: ((User) -> Unit)? = null
+    var onClickRemoveWaitList: ((User) -> Unit)? = null
+    var onClickShowWaiListDialog: ((User) -> Unit)? = null
 
     private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<User>() {
 
@@ -59,8 +67,13 @@ class UserListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 parent,
                 false
             ),
-            onItemClicked = onItemClick
-        )
+            patientId = patientId,
+            onClickStart = onClickStart,
+            onClickDone = onClickDone,
+            onClickAddWaiting = onClickAddWaiting,
+            onClickRemoveWaitList = onClickRemoveWaitList,
+            onClickShowWaiListDialog = onClickShowWaiListDialog
+            )
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
@@ -79,23 +92,95 @@ class UserListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         differ.submitList(list)
     }
 
-    fun getFirstUserId(): String {
-        return differ.currentList[0].userId
+    fun getFirstUserOrNull(): User? {
+        if (differ.currentList.isEmpty()) {
+            return null
+        }
+        return differ.currentList[0]
     }
 
     class UserViewHolder
     constructor(
         itemView: View,
-        private val onItemClicked: ((User) -> Unit)?
+        private val patientId: String?,
+        private val onClickStart: ((User) -> Unit)? = null,
+        private val onClickDone: ((User) -> Unit)? = null,
+        private val onClickAddWaiting: ((User) -> Unit)? = null,
+        private val onClickRemoveWaitList: ((User) -> Unit)? = null,
+        private val onClickShowWaiListDialog: ((User) -> Unit)? = null
+
     ) : RecyclerView.ViewHolder(itemView) {
 
         fun bind(user: User) = with(itemView) {
 
             text_username_user_item_list.text = user.username
-            itemView.setOnClickListener {
-                onItemClicked?.invoke(user)
-            }
+
+
+            if (user.userType == UserType.DOCTOR) {
+                var strAction: String = "Start"
+                var color: Int = R.color.LimeGreen
+                var actionListener: ((User) -> Unit)? = null
+
+                // action button cases
+                if (user.currentPatient == null) { // doctor available
+                    strAction = "Start"
+                    color = R.color.LimeGreen
+                    actionListener = onClickStart
+                } else if (user.currentPatient.userId == patientId) { // current patient in session
+                    strAction = "Done"
+                    color = R.color.Orange
+                    actionListener = onClickDone
+                } else {
+                    val existsInWaitingList = user.waitingList?.any{ it.userId == patientId } ?: false
+                    if (existsInWaitingList) {
+                        strAction = "Cancel wait"
+                        color = R.color.IndianRed
+                        actionListener = onClickRemoveWaitList
+                    } else {
+                        strAction = "Add to wait"
+                        color = R.color.RoyalBlue
+                        actionListener = onClickAddWaiting
+                    }
+                }
+
+                // apply to button
+                button_make_action.apply {
+                    visibility = View.VISIBLE
+                    text = strAction
+                    backgroundTintList = ContextCompat.getColorStateList(context,color)
+
+//                    setBackgroundColor(color)
+                    setOnClickListener {
+                        actionListener?.invoke(user)
+                    }
+                }
+
+                val available = (user.currentPatient == null)
+
+                // available/busy tag
+                text_doctor_available_user_item_list.apply {
+                    visibility = View.VISIBLE
+                    text = if (available) "Available" else "Busy"
+                    setTextColor(
+                        resources.getColor(
+                            if (available) R.color.Green else R.color.DarkRed
+                        )
+                    )
+                }
+                // waiting list size display
+                text_waiting_user_item_list.apply {
+                    visibility = if (available) View.INVISIBLE else View.VISIBLE
+                    text = if (available) "" else "${user.waitingList?.size ?: 0}"
+                    if (!available) {
+                        setOnClickListener {
+                            onClickShowWaiListDialog?.invoke(user)
+                        }
+                    }
+                }
+            }// end doctor changing
+
         }
+
     }
 
 }

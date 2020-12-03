@@ -1,7 +1,9 @@
 package com.example.moveohealth.repository
 
+import com.example.moveohealth.constants.Constants
 import com.example.moveohealth.constants.Constants.Companion.APP_DEBUG
 import com.example.moveohealth.model.User
+import com.example.moveohealth.model.User.Companion.KEY_USER_TYPE
 import com.example.moveohealth.model.UserType
 import com.example.moveohealth.ui.DataState
 import com.example.moveohealth.ui.Response
@@ -28,8 +30,10 @@ import timber.log.Timber
 class AuthRepository
 constructor(
     private val auth: FirebaseAuth,
-    private val firestore: FirebaseFirestore
+    firestore: FirebaseFirestore
 ){
+
+    private val usersCollectionRef = firestore.collection(Constants.FIRESTORE_ALL_USERS_KEY)
 
     fun loginMailAndPassword(
         userType: UserType,
@@ -54,22 +58,32 @@ constructor(
                     if (task.isSuccessful) {
                         val firebaseUser = auth.currentUser
                         Timber.tag(APP_DEBUG).e("AuthRepository: loginMailAndPassword: signInWithEmailAndPassword: success --> user = ${firebaseUser?.email}")
-                        firebaseUser?.let{
-                            firestore.collection("users").document(it.uid).update("userType", userType)
+                        if (firebaseUser != null) {
+                            usersCollectionRef.document(firebaseUser.uid).update(KEY_USER_TYPE, userType)
+                            usersCollectionRef.document(firebaseUser.uid).get().addOnCompleteListener { getUserTask ->
+                                if (getUserTask.isSuccessful) {
+                                    getUserTask.result?.toObject(User::class.java)?.let { user ->
+                                        offer(
+                                            DataState.success(
+                                                AuthViewState(user = user)
+                                            )
+                                        )
+                                        close()
+                                    }
+                                }
+                                cancel("Failed retrieve a user from db")
+                            }
+                        } else {
+                            cancel("Failed to SignUp")
                         }
-                        offer(
-                            DataState.success(
-                                AuthViewState(user = firebaseUser)
-                            )
-                        )
                     } else {
                         Timber.tag(APP_DEBUG).e("AuthRepository: loginMailAndPassword: createUserWithEmail: failure --> ${task.exception}")
                         val errMsg = task.exception?.message ?: "Failed to SignUp"
                         offer(
                             returnErrorResponse(errMsg, ResponseType.Dialog)
                         )
+                        close()
                     }
-                    close()
                 }
         }
         awaitClose {
@@ -114,17 +128,30 @@ constructor(
                         val newUser = User(
                             userId = firebaseUser!!.uid,
                             username = username,
+                            email = email,
                             userType = userType,
                             updatedAt = Timestamp.now(),
                             createdAt = Timestamp.now()
                         ).also { Timber.tag(APP_DEBUG).d("AuthRepository: registerMailAndPassword: newUser = $it") }
 
-                        firestore.collection("users").document(firebaseUser.uid).set(newUser)
-                        offer(
-                            DataState.success(
-                                AuthViewState(user = firebaseUser)
-                            )
-                        )
+                        usersCollectionRef.document(firebaseUser.uid).set(newUser)
+                            .addOnCompleteListener { taskSetUser ->
+                                if (taskSetUser.isSuccessful) {
+                                    offer(
+                                        DataState.success(
+                                            AuthViewState(user = newUser)
+                                        )
+                                    )
+                                } else {
+                                    Timber.tag(APP_DEBUG).e("createUserWithEmail: failure --> ${task.exception}")
+                                    val errMsg = taskSetUser.exception?.message ?: "Failed to create user"
+                                    offer(
+                                        returnErrorResponse(errMsg, ResponseType.Dialog)
+                                    )
+                                }
+                                close() // close channel
+                            }
+
                     } else {
                         // If sign in fails, display a message to the user.
                         Timber.tag(APP_DEBUG).e("createUserWithEmail: failure --> ${task.exception}")
@@ -132,8 +159,8 @@ constructor(
                         offer(
                             returnErrorResponse(errMsg, ResponseType.Dialog)
                         )
+                        close() // close channel
                     }
-                    close() // close channel
                 }
         }
         awaitClose {

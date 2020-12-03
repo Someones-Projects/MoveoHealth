@@ -8,18 +8,14 @@ import androidx.activity.viewModels
 import androidx.navigation.fragment.NavHostFragment
 import com.example.moveohealth.R
 import com.example.moveohealth.constants.Constants.Companion.APP_DEBUG
-import com.example.moveohealth.constants.Constants.Companion.KEY_INTENT_USER_TYPE
 import com.example.moveohealth.databinding.ActivityAuthBinding
-import com.example.moveohealth.session.SessionManager
 import com.example.moveohealth.ui.BaseActivity
 import com.example.moveohealth.ui.main.MainActivity
-import com.example.moveohealth.ui.ToolbarInteraction
 import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
-import javax.inject.Inject
 
 @AndroidEntryPoint
-class AuthActivity: BaseActivity(), ToolbarInteraction {
+class AuthActivity: BaseActivity() {
 
     private val viewModel: AuthViewModel by viewModels()
 
@@ -52,7 +48,7 @@ class AuthActivity: BaseActivity(), ToolbarInteraction {
         viewModel.viewState.observe(this, { viewState ->
             Timber.tag(APP_DEBUG).d("AuthActivity: subscribeObservers: dataState = $viewState")
             viewState.user?.let {
-                sessionManager.login(it)
+                sessionManager.login(it, viewModel.getUserType())
             }
         })
         sessionManager.cachedUser.observe(this, { user ->
@@ -92,7 +88,6 @@ class AuthActivity: BaseActivity(), ToolbarInteraction {
     private fun navMainActivity() {
         Timber.tag(APP_DEBUG).e("AuthActivity: navMainActivity: ...")
         val intent = Intent(this, MainActivity::class.java)
-        intent.putExtra(KEY_INTENT_USER_TYPE, viewModel.getUserType().name)
         startActivity(intent)
         finish()
     }

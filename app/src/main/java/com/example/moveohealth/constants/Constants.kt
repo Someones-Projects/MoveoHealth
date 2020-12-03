@@ -1,13 +1,18 @@
 package com.example.moveohealth.constants
 
+import androidx.datastore.preferences.preferencesKey
+import com.example.moveohealth.model.User
+import com.example.moveohealth.model.UserType
+
 class Constants {
 
     companion object{
         const val APP_DEBUG = "AppDebug"
 
-        const val FIRESTORE_USER: String = "users"
+        const val FIRESTORE_ALL_USERS_KEY: String = "users"
 
-        const val KEY_INTENT_USER_TYPE = "user_type"
+        val IS_SORTED_DOCTORS_KEY = preferencesKey<Boolean>("IS_SORTED_DOCTORS_KEY")
+
 
     }
 }

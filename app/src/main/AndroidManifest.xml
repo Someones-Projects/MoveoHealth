@@ -10,6 +10,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="false"
         android:theme="@style/Theme.MoveoHealth">
+        <activity
+            android:name=".ui.main.stamDrawer"
+            android:label="@string/title_activity_stam_drawer"
+            android:theme="@style/Theme.MoveoHealth.NoActionBar"></activity>
         <activity android:name=".ui.auth.AuthActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

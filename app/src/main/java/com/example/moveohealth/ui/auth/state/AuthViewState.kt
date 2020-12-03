@@ -1,6 +1,7 @@
 package com.example.moveohealth.ui.auth.state
 
 import android.os.Parcelable
+import com.example.moveohealth.model.User
 import com.example.moveohealth.model.UserType
 import com.example.moveohealth.ui.auth.state.RegistrationFields.RegistrationErrors.Companion.MUST_FILL_ALL_FIELDS
 import com.example.moveohealth.ui.auth.state.RegistrationFields.RegistrationErrors.Companion.NOT_VALID_EMAIL
@@ -13,7 +14,7 @@ import kotlinx.android.parcel.Parcelize
 data class AuthViewState(
         var registrationFields: RegistrationFields? = RegistrationFields(),
         var loginFields: LoginFields? = LoginFields(),
-        var user: FirebaseUser? = null
+        var user: User? = null
 ) : Parcelable
 
 
