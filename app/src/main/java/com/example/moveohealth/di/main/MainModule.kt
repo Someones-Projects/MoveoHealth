@@ -1,10 +1,7 @@
 package com.example.moveohealth.di.main
 
-import com.example.moveohealth.api.NotificationAPI
-import com.example.moveohealth.repository.AuthRepository
 import com.example.moveohealth.repository.MainRepository
 import com.example.moveohealth.session.SessionManager
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Module
 import dagger.Provides
@@ -21,12 +18,10 @@ object MainModule {
     fun provideMainRepository(
         firestore: FirebaseFirestore,
         sessionManager: SessionManager
-//        notificationAPI: NotificationAPI
     ): MainRepository {
         return MainRepository(
             firestore,
             sessionManager
-//            notificationAPI
         )
     }
 }

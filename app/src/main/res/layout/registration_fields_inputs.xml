@@ -8,50 +8,20 @@
     android:orientation="vertical"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <TextView
-        android:id="@+id/text_sign_up_as"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/sign_up_as"/>
 
-    <com.google.android.material.button.MaterialButtonToggleGroup
-        android:id="@+id/toggle_button_user_type_sign_up"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="@dimen/margin_top_text_input_layout_login"
-        app:checkedButton="@+id/button_type_doctor"
-        app:selectionRequired="true"
-        app:singleSelection="true">
-
-        <Button
-            android:id="@+id/button_type_doctor"
-            style="?attr/materialButtonOutlinedStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/doctor"
-            android:textAllCaps="false" />
-
-        <Button
-            android:id="@+id/button_type_patient"
-            style="?attr/materialButtonOutlinedStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/patient"
-            android:textAllCaps="false" />
-    </com.google.android.material.button.MaterialButtonToggleGroup>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/input_layout_registration_username"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_top_text_input_layout_login"
+        android:layout_marginTop="20dp"
         app:errorEnabled="true">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/edit_text_registration_input_username"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@color/Transparent"
             android:hint="@string/username"
             android:imeOptions="flagNoExtractUi"
             android:inputType="text" />
@@ -62,13 +32,13 @@
         android:id="@+id/input_layout_registration_email"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_top_text_input_layout_login"
         app:errorEnabled="true">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/edit_text_registration_input_email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@color/Transparent"
             android:hint="@string/email_field"
             android:imeOptions="flagNoExtractUi"
             android:inputType="textEmailAddress" />
@@ -80,7 +50,6 @@
         android:id="@+id/input_layout_registration_password"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_top_text_input_layout_login"
         app:endIconMode="password_toggle"
         app:errorEnabled="true"
         app:helperTextEnabled="true">
@@ -89,6 +58,7 @@
             android:id="@+id/edit_text_registration_input_password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@color/Transparent"
             android:hint="@string/field_password"
             android:imeOptions="flagNoExtractUi"
             android:inputType="textPassword"
@@ -101,7 +71,6 @@
         android:id="@+id/input_layout_registration_password_confirm"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_top_text_input_layout_login"
         app:endIconMode="password_toggle"
         app:errorEnabled="true">
 
@@ -109,6 +78,7 @@
             android:id="@+id/edit_text_registration_input_password_confirm"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@color/Transparent"
             android:hint="@string/field_confirm_password"
             android:imeOptions="flagNoExtractUi|actionDone"
             android:inputType="textPassword"/>
@@ -120,14 +90,44 @@
         android:id="@+id/text_view_registration_instructions"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="4dp"
         android:text="@string/registration_password_constraints"/>
+
+
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/toggle_button_user_type_sign_up"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:layout_gravity="center"
+        android:gravity="center"
+        app:checkedButton="@+id/button_type_doctor"
+        app:selectionRequired="true"
+        app:singleSelection="true">
+
+        <Button
+            android:id="@+id/button_type_doctor"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="140dp"
+            android:layout_height="wrap_content"
+            android:text="@string/doctor"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/button_type_patient"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="140dp"
+            android:layout_height="wrap_content"
+            android:text="@string/patient"
+            android:textAllCaps="false" />
+
+    </com.google.android.material.button.MaterialButtonToggleGroup>
 
     <Button
         android:id="@+id/register_button"
         android:layout_width="match_parent"
         android:layout_height="@dimen/height_login_button"
-        android:layout_marginTop="72dp"
+        android:layout_marginTop="42dp"
         android:layout_marginBottom="40dp"
         android:background="@drawable/design_selector_button_login_bg"
         android:gravity="center"

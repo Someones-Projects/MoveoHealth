@@ -12,48 +12,11 @@
         android:layout_marginEnd="@dimen/input_fields_layout_margin"
         android:paddingBottom="12dp">
 
-        <TextView
-            android:id="@+id/text_choose_user_type"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="@string/login_as"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <com.google.android.material.button.MaterialButtonToggleGroup
-            android:id="@+id/toggle_button_user_type"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_top_text_input_layout_login"
-            app:checkedButton="@+id/button_type_doctor_login"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/text_choose_user_type"
-            app:selectionRequired="true"
-            app:singleSelection="true">
-
-            <Button
-                android:id="@+id/button_type_doctor_login"
-                style="?attr/materialButtonOutlinedStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/doctor"
-                android:textAllCaps="false" />
-
-            <Button
-                android:id="@+id/button_type_patient_login"
-                style="?attr/materialButtonOutlinedStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/patient"
-                android:textAllCaps="false" />
-        </com.google.android.material.button.MaterialButtonToggleGroup>
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/input_layout_login_email"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_top_text_input_layout_login"
             app:errorEnabled="true"
             app:layout_constraintBottom_toTopOf="@+id/input_layout_login_password"
             app:layout_constraintLeft_toLeftOf="parent"
@@ -64,6 +27,8 @@
                 android:id="@+id/edit_text_login_input_email"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:background="@color/Transparent"
                 android:hint="@string/email_field"
                 android:imeOptions="flagNoExtractUi"
                 android:inputType="textEmailAddress" />
@@ -75,7 +40,6 @@
             android:id="@+id/input_layout_login_password"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_top_text_input_layout_login"
             app:errorEnabled="true"
             app:endIconMode="password_toggle"
             app:layout_constraintLeft_toLeftOf="parent"
@@ -86,6 +50,7 @@
                 android:id="@+id/edit_text_login_input_password"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@color/Transparent"
                 android:hint="@string/field_password"
                 android:imeOptions="flagNoExtractUi"
                 android:inputType="textPassword" />
@@ -100,8 +65,39 @@
             android:paddingBottom="4dp"
             android:textSize="14sp"
             android:text="@string/forgot_password_question"
+            android:visibility="invisible"
             app:layout_constraintTop_toBottomOf="@+id/input_layout_login_password"
             app:layout_constraintEnd_toEndOf="parent"/>
+
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/toggle_button_user_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_top_text_input_layout_login"
+            app:checkedButton="@+id/button_type_doctor_login"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/forgot_password"
+            app:selectionRequired="true"
+            app:singleSelection="true">
+
+            <Button
+                android:id="@+id/button_type_doctor_login"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="140dp"
+                android:layout_height="wrap_content"
+                android:text="@string/doctor"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/button_type_patient_login"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="140dp"
+                android:layout_height="wrap_content"
+                android:text="@string/patient"
+                android:textAllCaps="false" />
+
+        </com.google.android.material.button.MaterialButtonToggleGroup>
 
         <Button
             android:id="@+id/login_button"
@@ -111,7 +107,7 @@
             android:background="@drawable/design_selector_button_login_bg"
             android:gravity="center"
             android:text="@string/text_login"
-            app:layout_constraintTop_toBottomOf="@+id/forgot_password"
+            app:layout_constraintTop_toBottomOf="@+id/toggle_button_user_type"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 

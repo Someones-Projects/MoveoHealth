@@ -53,20 +53,11 @@ class RegisterFragment: BaseAuthFragment(R.layout.fragment_register) {
 
     private fun subscribeObservers() {
         viewModel.dataState.observe(viewLifecycleOwner, { dataState ->
-            Timber.tag(APP_DEBUG).d("RegisterFragment: subscribeObservers: dataState = $dataState")
-
-            // TODO: handle email confirmation
-//            dataState?.success?.response?.peekContent()?.message?.let {
-//                if (it == SUCCESS_CONFIRM_EMAIL_ADDRESS_SENT) {
-//                    onConfirmEmailLinkSent()
-//                }
-//            }
             dataState?.error?.peekContent()?.response?.message?.let {
                 setErrorFieldsText(it)
             }
         })
         viewModel.viewState.observe(viewLifecycleOwner, { viewState ->
-            Timber.tag(APP_DEBUG).d("RegisterFragment: subscribeObservers: viewState = $viewState   ")
             viewState.registrationFields?.let { fields ->
                 fields.registration_username?.let { edit_text_registration_input_username.setText(it) }
                 fields.registration_email?.let{edit_text_registration_input_email.setText(it)}
@@ -108,9 +99,6 @@ class RegisterFragment: BaseAuthFragment(R.layout.fragment_register) {
         return_to_launcher_fragment.setOnClickListener {
             findNavController().popBackStack()
         }
-
-
-
     }
 
     private fun setTextEditListeners() {
@@ -212,8 +200,8 @@ class RegisterFragment: BaseAuthFragment(R.layout.fragment_register) {
     }
 
     private fun popStackBack() {
-        findNavController().popBackStack()
         toolbarInteraction.setToolbarTitle(getString(R.string.welcome))
+        findNavController().popBackStack()
     }
 
 }

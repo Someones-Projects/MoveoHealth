@@ -13,11 +13,14 @@ import com.example.moveohealth.ui.BaseActivity
 import com.example.moveohealth.ui.main.MainActivity
 import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
+import java.util.concurrent.atomic.AtomicBoolean
 
 @AndroidEntryPoint
 class AuthActivity: BaseActivity() {
 
     private val viewModel: AuthViewModel by viewModels()
+
+    private val alreadyNavMainActivity =  AtomicBoolean(false)
 
     private lateinit var binding: ActivityAuthBinding
 
@@ -28,15 +31,30 @@ class AuthActivity: BaseActivity() {
         setCollapseToolbar()
         onRestoreInstanceState()
         subscribeObservers()
-        showProgressBar(true)
         sessionManager.checkPreviousAuthUser()
-
     }
 
+    private fun onRestoreInstanceState() {
+        supportFragmentManager.findFragmentById(R.id.auth_fragments_container).let { hostFragment ->
+            if (hostFragment == null ){
+                createNavHost()
+            }
+        }
+    }
+
+    private fun createNavHost() {
+        val navHost = NavHostFragment.create(R.navigation.auth_nav_graph)
+        supportFragmentManager.beginTransaction()
+            .replace(
+                R.id.auth_fragments_container,
+                navHost,
+            )
+            .setPrimaryNavigationFragment(navHost)
+            .commit()
+    }
 
     private fun subscribeObservers() {
         viewModel.dataState.observe(this, { dataState ->
-            Timber.tag(APP_DEBUG).d("AuthActivity: subscribeObservers: dataState = $dataState")
             onDataStateChange(dataState)
             dataState.success.let { data ->
                 data?.data.let { event ->
@@ -49,22 +67,22 @@ class AuthActivity: BaseActivity() {
             }
         })
         viewModel.viewState.observe(this, { viewState ->
-            Timber.tag(APP_DEBUG).d("AuthActivity: subscribeObservers: dataState = $viewState")
             viewState.user?.let {
                 sessionManager.login(it)
             }
         })
         sessionManager.cachedUser.observe(this, { user ->
-            Timber.tag(APP_DEBUG).e("AuthActivity: subscribeObservers: user = $user")
             if (user != null) {
-                if (user.userId.isBlank() || user.email.isBlank()) { // init splash state
+                if (user.userId.isNotBlank() && user.email.isNotBlank()) { // state - user logged in
+                    showProgressBar(true)
+                    navMainActivity()
+                } else { //  state - splash while authenticate
                     showProgressBar(true)
                     binding.authFragmentsContainer.visibility = View.INVISIBLE
                     binding.textSplash.visibility = View.VISIBLE
-                } else { // got user state
-                    navMainActivity()
+                    binding.textSplash.text = getString(R.string.app_name) + "\nBy Asaf Ben Artzy"
                 }
-            } else { // login state
+            } else { // state - show login
                 showProgressBar(false)
                 binding.authFragmentsContainer.visibility = View.VISIBLE
                 binding.textSplash.visibility = View.INVISIBLE
@@ -79,33 +97,15 @@ class AuthActivity: BaseActivity() {
         binding.appBar.setExpanded(isExpand, false)
     }
 
-    private fun onRestoreInstanceState() {
-        supportFragmentManager.findFragmentById(R.id.auth_fragments_container).let { hostFragment ->
-            if (hostFragment == null ){
-                createNavHost()
-            }
-        }
-        binding.textSplash.text = getString(R.string.app_name) + "\nBy Asaf Ben Artzy"
-    }
-
-    private fun createNavHost() {
-        val navHost = NavHostFragment.create(R.navigation.auth_nav_graph)
-        supportFragmentManager.beginTransaction()
-            .replace(
-                R.id.auth_fragments_container,
-                navHost,
-            )
-            .setPrimaryNavigationFragment(navHost)
-            .commit()
-    }
-
     private fun navMainActivity() {
-        Timber.tag(APP_DEBUG).e("AuthActivity: navMainActivity: ...")
-        val intent = Intent(this, MainActivity::class.java)
-        startActivity(intent)
-        finish()
+        // check b/c until activity destroy still observe cached user and can call it twice
+        if (alreadyNavMainActivity.compareAndSet(false, true)) {
+            Timber.tag(APP_DEBUG).e("AuthActivity: navMainActivity: ...")
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
     }
-
 
     override fun showProgressBar(show: Boolean) {
         binding.progressBar.visibility =
@@ -118,8 +118,11 @@ class AuthActivity: BaseActivity() {
 
     override fun setToolbarTitle(text: String?) {
         Timber.tag(APP_DEBUG).e("AuthActivity: setToolbarTitle: $text")
-        supportActionBar?.apply {
-            title = text
-        }
+        binding.toolbarLayout.title = text
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Timber.tag(APP_DEBUG).e("AuthActivity: onDestroy: ...")
     }
 }

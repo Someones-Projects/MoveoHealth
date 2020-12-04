@@ -54,7 +54,7 @@ class LoginFragment: BaseAuthFragment(R.layout.fragment_login) {
     private fun setClickListeners() {
         binding.loginButton.setOnClickListener { login() }
         binding.textOrSignUp.setOnClickListener { navRegistration() }
-        binding.forgotPassword.setOnClickListener { navForgotPassword() }
+//        binding.forgotPassword.setOnClickListener { navForgotPassword() }
     }
 
     private fun setInputChangeListeners() {
@@ -138,16 +138,9 @@ class LoginFragment: BaseAuthFragment(R.layout.fragment_login) {
         }
     }
 
-
     private fun navRegistration() {
         toolbarInteraction.setToolbarTitle(getString(R.string.sign_up)) // faster than onCreateView
         findNavController().navigate(R.id.action_loginFragment_to_registerFragment)
-    }
-
-    private fun navForgotPassword() {
-//        (activity as AuthActivity).auth_app_bar?.setExpanded(false, false)
-//        (activity as AuthActivity).setAppBarTitle(getString(R.string.password)) // faster than onCreateView
-//        findNavController().navigate(R.id.action_loginFragment_to_forgotPasswordFragment)
     }
 
 

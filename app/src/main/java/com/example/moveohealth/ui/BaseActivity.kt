@@ -14,7 +14,7 @@ import javax.inject.Inject
 abstract class BaseActivity: AppCompatActivity(),
     DataStateChangeListener,
     UICommunicationListener,
-        ToolbarInteraction
+    ToolbarInteraction
 {
 
     @Inject

@@ -11,43 +11,22 @@ import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import com.example.moveohealth.R
-import com.example.moveohealth.api.NotificationAPI
-import com.example.moveohealth.api.PushNotification
-import com.example.moveohealth.api.SyncWodRequest
 import com.example.moveohealth.constants.Constants.Companion.APP_DEBUG
-import com.example.moveohealth.constants.Constants.Companion.TOPIC
 import com.example.moveohealth.databinding.ActivityMainBinding
-import com.example.moveohealth.model.NotificationData
 import com.example.moveohealth.model.User
 import com.example.moveohealth.model.UserType
 import com.example.moveohealth.ui.BaseActivity
 import com.example.moveohealth.ui.auth.AuthActivity
-import com.example.moveohealth.ui.displayToast
 import com.example.moveohealth.ui.main.doctor.DoctorFragment
-import com.example.moveohealth.ui.main.state.MainStateEvent
-import com.example.moveohealth.ui.main.state.MainStateEvent.*
-import com.example.moveohealth.util.RetrofitInstance
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.messaging.FirebaseMessaging
-import com.google.firebase.messaging.RemoteMessage
-import com.google.firebase.messaging.ktx.messaging
-import com.google.gson.Gson
+import com.example.moveohealth.ui.main.state.MainStateEvent.UpdateChangeUserType
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import org.json.JSONObject
 import timber.log.Timber
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : BaseActivity() {
-
-    @Inject
-    lateinit var notificationAPI: NotificationAPI
 
     private lateinit var binding: ActivityMainBinding
 
@@ -62,30 +41,6 @@ class MainActivity : BaseActivity() {
         setSupportActionBar(binding.toolbar)
         setClickListeners()
         subscribeObservers()
-
-        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
-            if (!task.isSuccessful) {
-                Timber.tag(APP_DEBUG).e("AuthActivity: onCreate: Fetching FCM registration token failed - ${task.exception}")
-                return@OnCompleteListener
-            }
-
-            // Get new FCM registration token
-            val token = task.result
-
-            // Log and toast
-            val msg = "FCM token - $token"
-            Timber.tag(APP_DEBUG).e("AuthActivity: onCreate: msg - $msg")
-//            displayToast(msg)
-        })
-        Firebase.messaging.subscribeToTopic(TOPIC)
-            .addOnCompleteListener { task ->
-                var msg = "Subscribe to $TOPIC"
-                if (!task.isSuccessful) {
-                    msg = "Subscribe failed"
-                }
-                // Log and toast
-                Timber.tag(APP_DEBUG).e("AuthActivity: onCreate: subscribeToTopic: msg - $msg")
-            }
     }
 
     override fun onStart() {
@@ -106,16 +61,15 @@ class MainActivity : BaseActivity() {
     private fun setClickListeners() {
         binding.apply {
             fabExtendedGetNextPatient.setOnClickListener {
-                sendNotification()
-//                val fragments = supportFragmentManager
-//                    .findFragmentById(R.id.main_fragments_container)
-//                    ?.childFragmentManager
-//                    ?.fragments
-//                fragments?.forEach { fragment ->
-//                    when (fragment) {
-//                        is DoctorFragment -> fragment.handleNextPatientClicked()
-//                    }
-//                }
+                val fragments = supportFragmentManager
+                    .findFragmentById(R.id.main_fragments_container)
+                    ?.childFragmentManager
+                    ?.fragments
+                fragments?.forEach { fragment ->
+                    when (fragment) {
+                        is DoctorFragment -> fragment.handleNextPatientClicked()
+                    }
+                }
             }
         }
     }
@@ -123,6 +77,7 @@ class MainActivity : BaseActivity() {
     private fun subscribeObservers() {
         sessionManager.cachedUser.distinctUntilChanged().observe(this, { user ->
             if (user == null) {
+                Timber.tag(APP_DEBUG).e("MainActivity: subscribeObservers:  user is null!!!")
                 navAuthActivity()
             } else {
                 viewModel.setUserType(user.userType)
@@ -147,56 +102,6 @@ class MainActivity : BaseActivity() {
         })
     }
 
-    private fun sendNotification() {
-        Timber.tag(APP_DEBUG).e("MainActivity: sendNotification: ...")
-
-        val notification = PushNotification(
-//            to = "c7gwkDsaSLOmOB6nAoZ8DA:APA91bGVHW1fUbZg9JewZ0NNmDoTS4R_4yZ6-U1sztkXF14r_SFykhH2c_zFC5Wf3VlBjpKIMRxIi5iDpwPXQee3ZoVbKRRoGKxSKkFiTmiuFIk8jIYH_jAZEA12df8i8CUWYrVfuKv3"
-            to = TOPIC
-            ,
-            data = NotificationData(
-                title = "Title",
-                message = "Body message.."
-            )
-        )
-
-
-        val msg = RemoteMessage
-            .Builder("String")
-            .build()
-
-
-        val response = FirebaseMessaging.getInstance().send(msg)
-        Timber.tag(APP_DEBUG).e("MainActivity: sendNotification: response= $response.")
-
-//        try {
-//            Timber.tag(APP_DEBUG).e("MainActivity: sendNotification: postNotification(notification)")
-////            val response = RetrofitInstance.api.postNotification(notification)
-//            val response = notificationAPI.syncWodList(
-//                authorization = "notification",
-//                requestBody = SyncWodRequest(emptyList())
-//            ).execute().also {
-//                Timber.tag(APP_DEBUG).e("MainActivity: sendNotification: response = $it")
-//            }
-//            if(response.isSuccessful) {
-//                Timber.tag(APP_DEBUG).d(
-//                    "MainRepository: sendNotification: Response: ${
-//                        Gson().toJson(
-//                            response
-//                        )
-//                    }"
-//                )
-//            } else {
-//                Timber.tag(APP_DEBUG).e(
-//                    "MainRepository: sendNotification: error = ${
-//                        response.errorBody().toString()
-//                    }"
-//                )
-//            }
-//        } catch (e: Exception) {
-//            Timber.tag(APP_DEBUG).e("sendNotification: exception = ${e.message}")
-//        }
-    }
 
     private fun createNavHost(navGraphId: Int) {
         Timber.tag(APP_DEBUG).d("MainActivity: createNavHost: ..")

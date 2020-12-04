@@ -1,11 +1,7 @@
 package com.example.moveohealth.repository
 
-import com.example.moveohealth.api.NotificationAPI
-import com.example.moveohealth.api.PushNotification
 import com.example.moveohealth.constants.Constants.Companion.APP_DEBUG
 import com.example.moveohealth.constants.Constants.Companion.FIRESTORE_ALL_USERS_KEY
-import com.example.moveohealth.constants.Constants.Companion.TOPIC
-import com.example.moveohealth.model.NotificationData
 import com.example.moveohealth.model.User
 import com.example.moveohealth.model.User.Companion.KEY_CURRENT_PATIENT
 import com.example.moveohealth.model.User.Companion.KEY_USER_TYPE
@@ -17,7 +13,6 @@ import com.example.moveohealth.ui.Response
 import com.example.moveohealth.ui.ResponseType
 import com.example.moveohealth.ui.main.state.MainViewState
 import com.google.firebase.firestore.*
-import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
@@ -30,7 +25,6 @@ class MainRepository
 constructor(
     firestore: FirebaseFirestore,
     private val sessionManager: SessionManager
-//    private val notificationAPI: NotificationAPI
 ) {
 
     private val userSession = sessionManager.cachedUser.value!!
@@ -61,6 +55,7 @@ constructor(
         Timber.tag(APP_DEBUG).e("MainRepository: listenToCurrentUserChanges: Exception = $it")
         emit(null)
     }.flowOn(IO)
+
 
     fun listenDoctorWaitingList(): Flow<Pair<User?, List<User>?>> =  callbackFlow {
         Timber.tag(APP_DEBUG).e("MainRepository: listenDoctorWaitingList: callbackFlow...")
@@ -131,46 +126,13 @@ constructor(
         doctorDocumentRef.update(KEY_CURRENT_PATIENT, patient).await()
         patient?.let { // if patient is null that means no more waiting
             doctorDocumentRef.update(KEY_WAITING_LIST, FieldValue.arrayRemove(patient)).await()
-            // TODO:  send notification
-            val notification = PushNotification(
-                to = TOPIC,
-                data = NotificationData(
-                    title = "Title",
-                    message = "Body message.."
-                )
-            )
-            sendNotification(notification)
-
+            // TODO:  send notification to patient
         }
         emit(DataState.success())
     }.catch {
         Timber.tag(APP_DEBUG).e("MainRepository: setCurrPatientAndRemoveFromWaitingList: Exception = $it")
         emit(DataState.error(Response(it.message.toString(), ResponseType.Dialog)))
     }.flowOn(IO)
-
-
-    private suspend fun sendNotification(notification: PushNotification) {
-//        try {
-//            val response = notificationAPI.postNotification(notification)
-//            if(response.isSuccessful) {
-//                Timber.tag(APP_DEBUG).d(
-//                    "MainRepository: sendNotification: Response: ${
-//                        Gson().toJson(
-//                            response
-//                        )
-//                    }"
-//                )
-//            } else {
-//                Timber.tag(APP_DEBUG).e(
-//                    "MainRepository: sendNotification: error = ${
-//                        response.errorBody().toString()
-//                    }"
-//                )
-//            }
-//        } catch (e: Exception) {
-//            Timber.tag(APP_DEBUG).e("MainRepository: sendNotification: exception = ${e.message}")
-//        }
-    }
 
 
     fun startPatientSessionForDoctor(
@@ -186,7 +148,6 @@ constructor(
         Timber.tag(APP_DEBUG).e("MainRepository: startPatientSessionForDoctor: Exception = $it")
         emit(DataState.error(Response(it.message.toString(), ResponseType.Dialog)))
     }.flowOn(IO)
-
 
 
     fun updateCurrentUserType(
@@ -219,6 +180,7 @@ constructor(
             emit(DataState.error(Response(it.message.toString(), ResponseType.Dialog)))
         }.flowOn(IO)
     }
+
 
     fun removePatientFromDoctorWaitList(
         patient: User,

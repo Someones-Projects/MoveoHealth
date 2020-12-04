@@ -42,7 +42,6 @@ constructor(
 
         viewModelScope.launch {
             sessionManager.isFilteredDoctors.collect {
-                Timber.tag(APP_DEBUG).d("MainViewModel: sessionManager.isSortedDoctors.collect: isSortDoctors.value = $it: ")
                 _isFilteredDoctors.value = it
             }
         }
