@@ -111,27 +111,27 @@ class UserListAdapter(
 
     ) : RecyclerView.ViewHolder(itemView) {
 
-        fun bind(user: User) = with(itemView) {
+        fun bind(userItem: User) = with(itemView) {
 
-            text_username_user_item_list.text = user.username
+            text_username_user_item_list.text = userItem.username
 
 
-            if (user.userType == UserType.DOCTOR) {
+            if (userItem.userType == UserType.DOCTOR) {
                 var strAction: String = "Start"
                 var color: Int = R.color.LimeGreen
                 var actionListener: ((User) -> Unit)? = null
 
                 // action button cases
-                if (user.currentPatient == null) { // doctor available
+                if (userItem.currentPatient == null) { // doctor available
                     strAction = "Start"
                     color = R.color.LimeGreen
                     actionListener = onClickStart
-                } else if (user.currentPatient.userId == patientId) { // current patient in session
+                } else if (userItem.currentPatient.userId == patientId) { // current patient in session
                     strAction = "Done"
                     color = R.color.Orange
                     actionListener = onClickDone
                 } else {
-                    val existsInWaitingList = user.waitingList?.any{ it.userId == patientId } ?: false
+                    val existsInWaitingList = userItem.waitingList?.any{ it.userId == patientId } ?: false
                     if (existsInWaitingList) {
                         strAction = "Cancel wait"
                         color = R.color.IndianRed
@@ -151,11 +151,11 @@ class UserListAdapter(
 
 //                    setBackgroundColor(color)
                     setOnClickListener {
-                        actionListener?.invoke(user)
+                        actionListener?.invoke(userItem)
                     }
                 }
 
-                val available = (user.currentPatient == null)
+                val available = (userItem.currentPatient == null)
 
                 // available/busy tag
                 text_doctor_available_user_item_list.apply {
@@ -170,10 +170,10 @@ class UserListAdapter(
                 // waiting list size display
                 text_waiting_user_item_list.apply {
                     visibility = if (available) View.INVISIBLE else View.VISIBLE
-                    text = if (available) "" else "${user.waitingList?.size ?: 0}"
+                    text = if (available) "" else "${userItem.waitingList?.size ?: 0}"
                     if (!available) {
                         setOnClickListener {
-                            onClickShowWaiListDialog?.invoke(user)
+                            onClickShowWaiListDialog?.invoke(userItem)
                         }
                     }
                 }

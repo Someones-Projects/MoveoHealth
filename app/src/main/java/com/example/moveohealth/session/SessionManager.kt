@@ -9,9 +9,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.moveohealth.constants.Constants.Companion.APP_DEBUG
 import com.example.moveohealth.constants.Constants.Companion.FIRESTORE_ALL_USERS_KEY
-import com.example.moveohealth.constants.Constants.Companion.IS_SORTED_DOCTORS_KEY
+import com.example.moveohealth.constants.Constants.Companion.IS_FILTERED_DOCTORS_KEY
 import com.example.moveohealth.model.User
-import com.example.moveohealth.model.UserType
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -37,11 +36,9 @@ constructor(
     private val dataStore: DataStore<Preferences>,
 ) {
 
-    private val _cachedUser = MutableLiveData<User?>()
+    private val _cachedUser = MutableLiveData(User())
     val cachedUser: LiveData<User?>
         get() = _cachedUser
-
-
 
 
     fun checkPreviousAuthUser() {
@@ -53,14 +50,18 @@ constructor(
                         if (task.isSuccessful) {
                             task.result?.toObject(User::class.java)?.let {
                                 setCachedUserValue(it)
+                                return@addOnCompleteListener
                             }
                         }
+                        setCachedUserValue(null)
                     }
+            } else {
+                setCachedUserValue(null)
             }
         }
     }
 
-    fun login(newUser: User, userType:UserType) {
+    fun login(newUser: User) {
         setCachedUserValue(newUser)
     }
 
@@ -83,33 +84,22 @@ constructor(
         }
     }
 
-    val isSortedDoctors: Flow<Boolean> = dataStore.data
+    val isFilteredDoctors: Flow<Boolean> = dataStore.data
         .catch { exception ->
             // dataStore.data throws an IOException when an error is encountered when reading data
             if (exception is IOException) emit(emptyPreferences())
             else throw exception // "If a different type of exception was thrown, prefer re-throwing it."
         }.map { preferences ->
-            preferences[IS_SORTED_DOCTORS_KEY] ?: true
+            preferences[IS_FILTERED_DOCTORS_KEY] ?: true
         }
 
 
     fun toggleSort() {
         CoroutineScope(Dispatchers.IO).launch {
             dataStore.edit { preferences ->
-                val sorted = preferences[IS_SORTED_DOCTORS_KEY] ?: true
+                val sorted = preferences[IS_FILTERED_DOCTORS_KEY] ?: true
                 Timber.tag(APP_DEBUG).d("SessionManager: toggleSort: setting sorted to ${!sorted}")
-                preferences[IS_SORTED_DOCTORS_KEY] = !sorted
-            }
-        }
-    }
-
-    fun setSortPref(sorted: Boolean) {
-        CoroutineScope(Dispatchers.IO).launch {
-            dataStore.edit { preferences ->
-                preferences[IS_SORTED_DOCTORS_KEY]?.let {
-                    Timber.tag(APP_DEBUG).d("SessionManager: toggleSort: setting sorted to ${!it}")
-                    preferences[IS_SORTED_DOCTORS_KEY] = !it
-                }
+                preferences[IS_FILTERED_DOCTORS_KEY] = !sorted
             }
         }
     }

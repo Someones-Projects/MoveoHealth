@@ -40,7 +40,17 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        app:layout_anchor="@+id/app_bar"/>
+        app:layout_anchor="@+id/app_bar"
+        android:visibility="invisible"/>
+
+
+    <TextView
+        android:id="@+id/text_splash"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="bottom|center_horizontal"
+        android:paddingBottom="100dp"
+        android:textSize="20sp"/>
 
 
     <ProgressBar

@@ -2,7 +2,6 @@ package com.example.moveohealth.ui.main.patient
 
 import android.os.Bundle
 import android.view.View
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.moveohealth.R
 import com.example.moveohealth.adapters.UserListAdapter
@@ -13,8 +12,6 @@ import com.example.moveohealth.ui.main.BaseMainFragment
 import com.example.moveohealth.ui.main.state.MainStateEvent.*
 import com.example.moveohealth.util.TopSpacingItemDecoration
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class PatientFragment : BaseMainFragment(R.layout.fragment_base_main_list) {
@@ -29,18 +26,23 @@ class PatientFragment : BaseMainFragment(R.layout.fragment_base_main_list) {
         binding.textListHeader.text = "Doctors:"
         setClickListeners()
         setupRecyclerView()
+        subscribeObservers()
     }
 
-    override fun onStart() {
-        super.onStart()
-        listenToDoctorListChanges()
-    }
-
-    private fun listenToDoctorListChanges() {
-        uiCommunicationListener.showProgressBar(show = true)
+    private fun subscribeObservers() {
         viewModel.doctorList.observe(viewLifecycleOwner, { doctors ->
             Timber.tag(APP_DEBUG).e("PatientFragment: observe: doctors = $doctors")
             doctors?.let { updateUiWithDoctors(it) }
+        })
+        viewModel.isFilteredDoctors.observe(viewLifecycleOwner, { filtered ->
+            binding.textFilteredDoctors.apply {
+                visibility = View.VISIBLE
+                text = if (filtered) {
+                    "Show all"
+                } else {
+                    "Show available"
+                }
+            }
         })
     }
 
@@ -48,19 +50,17 @@ class PatientFragment : BaseMainFragment(R.layout.fragment_base_main_list) {
         uiCommunicationListener.showProgressBar(show = false)
         mAdapter?.submitList(it)
         if (it.isEmpty()) {
-            binding.iconSortDoctors.visibility = View.INVISIBLE
             binding.textNoData.text = "No Doctors to show"
             binding.textNoData.visibility = View.VISIBLE
             binding.rv.visibility = View.GONE
         } else {
-            binding.iconSortDoctors.visibility = View.VISIBLE
             binding.textNoData.visibility = View.GONE
             binding.rv.visibility = View.VISIBLE
         }
     }
 
     private fun setClickListeners() {
-        binding.iconSortDoctors.setOnClickListener {
+        binding.textFilteredDoctors.setOnClickListener {
             viewModel.toggleSort()
         }
     }

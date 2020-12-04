@@ -1,7 +1,11 @@
 package com.example.moveohealth.repository
 
+import com.example.moveohealth.api.NotificationAPI
+import com.example.moveohealth.api.PushNotification
 import com.example.moveohealth.constants.Constants.Companion.APP_DEBUG
 import com.example.moveohealth.constants.Constants.Companion.FIRESTORE_ALL_USERS_KEY
+import com.example.moveohealth.constants.Constants.Companion.TOPIC
+import com.example.moveohealth.model.NotificationData
 import com.example.moveohealth.model.User
 import com.example.moveohealth.model.User.Companion.KEY_CURRENT_PATIENT
 import com.example.moveohealth.model.User.Companion.KEY_USER_TYPE
@@ -13,6 +17,7 @@ import com.example.moveohealth.ui.Response
 import com.example.moveohealth.ui.ResponseType
 import com.example.moveohealth.ui.main.state.MainViewState
 import com.google.firebase.firestore.*
+import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
@@ -20,10 +25,12 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 
+
 class MainRepository
 constructor(
     firestore: FirebaseFirestore,
     private val sessionManager: SessionManager
+//    private val notificationAPI: NotificationAPI
 ) {
 
     private val userSession = sessionManager.cachedUser.value!!
@@ -47,16 +54,16 @@ constructor(
                 offer(user)
             }
         awaitClose {
-            Timber.tag(APP_DEBUG).e("MainRepository: getDoctorPatientsList: Cancelling patientsList listener")
+            Timber.tag(APP_DEBUG).e("MainRepository: listenToCurrentUserChanges: Cancelling patientsList listener")
             listenerRegistration.remove()
         }
     }.catch {
-        Timber.tag(APP_DEBUG).e("MainRepository: getDoctorPatientsList: Exception = $it")
+        Timber.tag(APP_DEBUG).e("MainRepository: listenToCurrentUserChanges: Exception = $it")
         emit(null)
     }.flowOn(IO)
 
     fun listenDoctorWaitingList(): Flow<Pair<User?, List<User>?>> =  callbackFlow {
-        Timber.tag(APP_DEBUG).e("MainRepository: getDoctorPatientsList: callbackFlow...")
+        Timber.tag(APP_DEBUG).e("MainRepository: listenDoctorWaitingList: callbackFlow...")
         val listenerRegistration = currUserDocumentRef
             .addSnapshotListener { documentSnapshot: DocumentSnapshot?, firebaseFirestoreException: FirebaseFirestoreException? ->
                 if (firebaseFirestoreException != null) {
@@ -71,20 +78,20 @@ constructor(
                 }
             }
         awaitClose {
-            Timber.tag(APP_DEBUG).e("MainRepository: getDoctorPatientsList: Cancelling patientsList listener")
+            Timber.tag(APP_DEBUG).e("MainRepository: listenDoctorWaitingList: Cancelling patientsList listener")
             listenerRegistration.remove()
         }
     }.catch {
-        Timber.tag(APP_DEBUG).e("MainRepository: getDoctorPatientsList: Exception = $it")
+        Timber.tag(APP_DEBUG).e("MainRepository: listenDoctorWaitingList: Exception = $it")
         emit(Pair(null, emptyList()))
     }.flowOn(IO)
 
 
     fun listenAllDoctorsList(
-        sortByAvailable: Boolean
+        filterOnlyAvailable: Boolean
     ): Flow<List<User>?> = callbackFlow {
         Timber.tag(APP_DEBUG).e("MainRepository: listenAllDoctorsList: callbackFlow...")
-        Timber.tag(APP_DEBUG).d("MainRepository: listenAllDoctorsList: sortByAvailable = $sortByAvailable")
+        Timber.tag(APP_DEBUG).d("MainRepository: listenAllDoctorsList: sortByAvailable = $filterOnlyAvailable")
         val listenerRegistration = allUsersCollectionRef
             .whereEqualTo(KEY_USER_TYPE, UserType.DOCTOR)
             .addSnapshotListener { querySnapshot: QuerySnapshot?, firebaseFirestoreException: FirebaseFirestoreException? ->
@@ -95,12 +102,12 @@ constructor(
                     )
                     return@addSnapshotListener
                 }
-                val doctors = querySnapshot?.toObjects(User::class.java)
-                Timber.tag(APP_DEBUG).d("MainRepository: listenAllDoctorsList: doctors  = $doctors")
-                if (sortByAvailable) {
-                    doctors?.sortBy { it.waitingList?.size }
-                    doctors?.sortBy { it.currentPatient != null }
-                    Timber.tag(APP_DEBUG).d("MainRepository: listenAllDoctorsList: doctors sorted = $doctors")
+                var doctors = querySnapshot?.toObjects(User::class.java)
+                Timber.tag(APP_DEBUG).d("MainRepository: listenAllDoctorsList: doctors size  = ${doctors?.size}")
+                if (filterOnlyAvailable) {
+//                    doctors?.sortBy { it.waitingList?.size }
+                    doctors = doctors?.filter { it.currentPatient == null }
+                    Timber.tag(APP_DEBUG).d("MainRepository: listenAllDoctorsList: doctors filtered = $doctors")
                 }
                 offer(doctors)
             }
@@ -114,22 +121,56 @@ constructor(
     }.flowOn(IO)
 
 
-    fun removeFromWaitingListAndSetCurrPatient(
+    fun setCurrPatientAndRemoveFromWaitingList(
         patient: User?,
         doctorId: String
     ): Flow<DataState<MainViewState>> = flow<DataState<MainViewState>> {
-        Timber.tag(APP_DEBUG).e("MainRepository: removePatientFromWaitingList: ...")
+        Timber.tag(APP_DEBUG).e("MainRepository: setCurrPatientAndRemoveFromWaitingList: ...")
         emit(DataState.loading(isLoading = true))
         val doctorDocumentRef = allUsersCollectionRef.document(doctorId)
         doctorDocumentRef.update(KEY_CURRENT_PATIENT, patient).await()
-        patient?.let { // if patient is null that mean no more waiting
+        patient?.let { // if patient is null that means no more waiting
             doctorDocumentRef.update(KEY_WAITING_LIST, FieldValue.arrayRemove(patient)).await()
+            // TODO:  send notification
+            val notification = PushNotification(
+                to = TOPIC,
+                data = NotificationData(
+                    title = "Title",
+                    message = "Body message.."
+                )
+            )
+            sendNotification(notification)
+
         }
         emit(DataState.success())
     }.catch {
-        Timber.tag(APP_DEBUG).e("MainRepository: removeFromWaitingListAndSetCurrPatient: Exception = $it")
+        Timber.tag(APP_DEBUG).e("MainRepository: setCurrPatientAndRemoveFromWaitingList: Exception = $it")
         emit(DataState.error(Response(it.message.toString(), ResponseType.Dialog)))
     }.flowOn(IO)
+
+
+    private suspend fun sendNotification(notification: PushNotification) {
+//        try {
+//            val response = notificationAPI.postNotification(notification)
+//            if(response.isSuccessful) {
+//                Timber.tag(APP_DEBUG).d(
+//                    "MainRepository: sendNotification: Response: ${
+//                        Gson().toJson(
+//                            response
+//                        )
+//                    }"
+//                )
+//            } else {
+//                Timber.tag(APP_DEBUG).e(
+//                    "MainRepository: sendNotification: error = ${
+//                        response.errorBody().toString()
+//                    }"
+//                )
+//            }
+//        } catch (e: Exception) {
+//            Timber.tag(APP_DEBUG).e("MainRepository: sendNotification: exception = ${e.message}")
+//        }
+    }
 
 
     fun startPatientSessionForDoctor(
@@ -153,14 +194,15 @@ constructor(
     ): Flow<DataState<MainViewState>> = flow<DataState<MainViewState>> {
         emit(DataState.loading(isLoading = true))
         currUserDocumentRef.update(KEY_USER_TYPE, type).await()
-        emit(DataState.success(
-            data = MainViewState()
-        ))
+        emit(
+            DataState.success(
+                data = MainViewState()
+            )
+        )
     }.catch {
         Timber.tag(APP_DEBUG).e("MainRepository: updateCurrentUserType: Exception = $it")
         emit(DataState.error(Response(it.message.toString(), ResponseType.Dialog)))
     }.flowOn(IO)
-
 
 
     fun addPatientToDoctorWaitList(doctorId: String): Flow<DataState<MainViewState>> {

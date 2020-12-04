@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.moveohealth">
 
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+
     <application
         android:name=".BaseApplication"
         android:allowBackup="true"
@@ -9,11 +12,10 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="false"
-        android:theme="@style/Theme.MoveoHealth">
-        <activity
-            android:name=".ui.main.stamDrawer"
-            android:label="@string/title_activity_stam_drawer"
-            android:theme="@style/Theme.MoveoHealth.NoActionBar"></activity>
+        android:theme="@style/Theme.MoveoHealth"
+        android:usesCleartextTraffic="true"
+        >
+
         <activity android:name=".ui.auth.AuthActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -22,6 +24,16 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.main.MainActivity" />
+
+        <service
+            android:name=".service.MyFirebaseMessagingService"
+            android:permission="com.google.android.c2dm.permission.SEND">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+            </intent-filter>
+        </service>
+
     </application>
 
 </manifest>

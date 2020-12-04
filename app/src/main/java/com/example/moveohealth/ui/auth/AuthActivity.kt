@@ -28,8 +28,11 @@ class AuthActivity: BaseActivity() {
         setCollapseToolbar()
         onRestoreInstanceState()
         subscribeObservers()
+        showProgressBar(true)
         sessionManager.checkPreviousAuthUser()
+
     }
+
 
     private fun subscribeObservers() {
         viewModel.dataState.observe(this, { dataState ->
@@ -48,13 +51,23 @@ class AuthActivity: BaseActivity() {
         viewModel.viewState.observe(this, { viewState ->
             Timber.tag(APP_DEBUG).d("AuthActivity: subscribeObservers: dataState = $viewState")
             viewState.user?.let {
-                sessionManager.login(it, viewModel.getUserType())
+                sessionManager.login(it)
             }
         })
         sessionManager.cachedUser.observe(this, { user ->
             Timber.tag(APP_DEBUG).e("AuthActivity: subscribeObservers: user = $user")
-            user?.let {
-                navMainActivity()
+            if (user != null) {
+                if (user.userId.isBlank() || user.email.isBlank()) { // init splash state
+                    showProgressBar(true)
+                    binding.authFragmentsContainer.visibility = View.INVISIBLE
+                    binding.textSplash.visibility = View.VISIBLE
+                } else { // got user state
+                    navMainActivity()
+                }
+            } else { // login state
+                showProgressBar(false)
+                binding.authFragmentsContainer.visibility = View.VISIBLE
+                binding.textSplash.visibility = View.INVISIBLE
             }
         })
     }
@@ -72,6 +85,7 @@ class AuthActivity: BaseActivity() {
                 createNavHost()
             }
         }
+        binding.textSplash.text = getString(R.string.app_name) + "\nBy Asaf Ben Artzy"
     }
 
     private fun createNavHost() {

@@ -71,7 +71,7 @@ constructor(
                                         close()
                                     }
                                 }
-                                cancel("Failed retrieve a user from db")
+                                cancel("User doesn't exists in db")
                             }
                         } else {
                             cancel("Failed to SignUp")

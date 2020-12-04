@@ -28,23 +28,32 @@ constructor(
     @Assisted private val savedStateHandle: SavedStateHandle
 ):BaseViewModel<MainStateEvent, MainViewState>() {
 
-    private val isSortDoctors = MutableLiveData(true)
+    private val _userType = MutableLiveData<UserType>()
+    val userType: LiveData<UserType>
+        get() = _userType
+
+    private val _isFilteredDoctors = MutableLiveData(true)
+    val isFilteredDoctors: LiveData<Boolean>
+        get() = _isFilteredDoctors
+
 
     init {
+        _userType.value = sessionManager.cachedUser.value?.userType
+
         viewModelScope.launch {
-            sessionManager.isSortedDoctors.collect {
+            sessionManager.isFilteredDoctors.collect {
                 Timber.tag(APP_DEBUG).d("MainViewModel: sessionManager.isSortedDoctors.collect: isSortDoctors.value = $it: ")
-                isSortDoctors.value = it
+                _isFilteredDoctors.value = it
             }
         }
     }
 
-    fun getIsSortDoctors(): Boolean? = isSortDoctors.value
+    fun getIsSortDoctors(): Boolean? = isFilteredDoctors.value
 
     fun toggleSort() {
         sessionManager.toggleSort()
     }
-    val doctorList: LiveData<List<User>?> = isSortDoctors.switchMap { filter ->
+    val doctorList: LiveData<List<User>?> = isFilteredDoctors.switchMap { filter ->
         mainRepository
             .listenAllDoctorsList(filter)
             .distinctUntilChanged()
@@ -72,7 +81,7 @@ constructor(
 
             is EnterNewPatientFromQueue -> {
                 sessionManager.cachedUser.value!!.userId.let {  doctorId ->
-                    mainRepository.removeFromWaitingListAndSetCurrPatient(
+                    mainRepository.setCurrPatientAndRemoveFromWaitingList(
                         patient = stateEvent.patient,
                         doctorId = doctorId
                     ).asLiveData()
@@ -88,7 +97,7 @@ constructor(
             }
 
             is PatientClickedDoneTreatment -> {
-                mainRepository.removeFromWaitingListAndSetCurrPatient(
+                mainRepository.setCurrPatientAndRemoveFromWaitingList(
                     patient = stateEvent.nextPatient,
                     doctorId = stateEvent.doctorId
                 ).asLiveData()
@@ -130,8 +139,14 @@ constructor(
     }
 
     fun getUsername(): String = sessionManager.cachedUser.value?.username ?: ""
+
     fun getUserId(): String = sessionManager.cachedUser.value?.userId ?: ""
 
+    fun setUserType(userType: UserType) {
+        if (_userType.value != userType) {
+            _userType.value = userType
+        }
+    }
 
 
 }

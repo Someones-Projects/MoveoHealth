@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true">
@@ -20,28 +21,38 @@
             android:gravity="center_vertical"
             android:textSize="26sp"
             android:visibility="gone"/>
+<!--        -->
+<!--        <include-->
+<!--            layout="@layout/adapter_user_list_item"-->
+<!--            android:id="@+id/layout_curr_patient"-->
+<!--            android:visibility="gone"/>-->
+
 
         <TextView
             android:id="@+id/text_list_header"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:layout_marginTop="24dp"
             android:layout_marginStart="12dp"
             android:layout_marginEnd="12dp"
             android:layout_below="@+id/text_doctor_current_patient"
             android:gravity="center_vertical"
-            android:textSize="26sp" />
+            android:textSize="20sp" />
 
-        <ImageView
-            android:id="@+id/icon_sort_doctors"
+        <Button
+            style="?attr/materialButtonOutlinedStyle"
+            android:id="@+id/text_filtered_doctors"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="12dp"
             android:layout_alignParentEnd="true"
             android:layout_alignTop="@+id/text_list_header"
             android:layout_alignBottom="@+id/text_list_header"
+            android:gravity="center"
+            android:textAllCaps="false"
+            android:drawablePadding="12dp"
             android:visibility="invisible"
-            android:src="@drawable/ic_filter_list_24"/>
+            app:drawableEndCompat="@drawable/ic_filter_list_24" />
 
         <TextView
             android:id="@+id/text_no_data"

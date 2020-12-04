@@ -1,5 +1,6 @@
 package com.example.moveohealth.di.main
 
+import com.example.moveohealth.api.NotificationAPI
 import com.example.moveohealth.repository.AuthRepository
 import com.example.moveohealth.repository.MainRepository
 import com.example.moveohealth.session.SessionManager
@@ -20,10 +21,12 @@ object MainModule {
     fun provideMainRepository(
         firestore: FirebaseFirestore,
         sessionManager: SessionManager
+//        notificationAPI: NotificationAPI
     ): MainRepository {
         return MainRepository(
             firestore,
             sessionManager
+//            notificationAPI
         )
     }
 }
