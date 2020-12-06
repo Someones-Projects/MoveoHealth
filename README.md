@@ -3,7 +3,7 @@ Doctors and patients system android app
 
 ## Overview:
 * The app developed with Kotlin on Android Studio IDE
-* App based on the Jetpack libraries, navigation components and Material Design components. Also, can handle configuration changes like rotation and dat/night theme,
+* App based on the Jetpack libraries, navigation components and Material Design components. Also, can handle configuration changes like rotation and day/night theme.
 * MVI (MVVM) architecture - each UI event return ViewState wrapped by his state (Loading, Success, Error).
 * Use of Firebase as project backend for managing database and user authentication.
 
@@ -13,7 +13,7 @@ Doctors and patients system android app
 * Coroutines and Flow for background operations inside the repository pattern.
 * Observing LiveData for UI changes.
 * DataStore - for saving user preferences (such as filter option)
-* Precess death handling - saving view state instance.
+* Process death handling - saving view state instance.
 * LeakCanary - to detect memory leaks problems.
 * ViewBinding - for safe and fast views reference
 * Timber - Secure logging (print logs only for debug build)
@@ -28,4 +28,4 @@ Doctors and patients system android app
   * Listening on Firestore db changes and update the UI  accordantly 
   * Listening task is on background thread with Flow that emits data whenever change occurred. 
   * Listening job live only when UI shown (between onSart() until onStop())
-  * SessionManager: Singleton object to store and mange session operation and data
+* SessionManager: Singleton object to store and mange session operation and data
