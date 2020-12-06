@@ -1,7 +1,11 @@
 package com.example.moveohealth.repository
 
+import com.example.moveohealth.api.NotificationAPI
+import com.example.moveohealth.api.NotificationData
+import com.example.moveohealth.api.PushNotification
 import com.example.moveohealth.constants.Constants.Companion.APP_DEBUG
 import com.example.moveohealth.constants.Constants.Companion.FIRESTORE_ALL_USERS_KEY
+import com.example.moveohealth.constants.Constants.Companion.TOPIC
 import com.example.moveohealth.model.User
 import com.example.moveohealth.model.User.Companion.KEY_CURRENT_PATIENT
 import com.example.moveohealth.model.User.Companion.KEY_USER_TYPE
@@ -13,10 +17,13 @@ import com.example.moveohealth.ui.Response
 import com.example.moveohealth.ui.ResponseType
 import com.example.moveohealth.ui.main.state.MainViewState
 import com.google.firebase.firestore.*
+import com.google.gson.Gson
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 
@@ -24,8 +31,11 @@ import timber.log.Timber
 class MainRepository
 constructor(
     firestore: FirebaseFirestore,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val notificationAPI: NotificationAPI
 ) {
+
+    private val TAG: String = "AppDebug - Retrofit"
 
     private val userSession = sessionManager.cachedUser.value!!
 
@@ -126,7 +136,7 @@ constructor(
         doctorDocumentRef.update(KEY_CURRENT_PATIENT, patient).await()
         patient?.let { // if patient is null that means no more waiting
             doctorDocumentRef.update(KEY_WAITING_LIST, FieldValue.arrayRemove(patient)).await()
-            // TODO:  send notification to patient
+            sendNotificationNewUserSession(patient.username)
         }
         emit(DataState.success())
     }.catch {
@@ -138,11 +148,10 @@ constructor(
     fun startPatientSessionForDoctor(
         doctorId: String
     ): Flow<DataState<MainViewState>> = flow<DataState<MainViewState>> {
+        val patientSession = sessionManager.cachedUser.value
         emit(DataState.loading(isLoading = true))
-        allUsersCollectionRef.document(doctorId).update(
-            KEY_CURRENT_PATIENT,
-            sessionManager.cachedUser.value
-        ).await()
+        allUsersCollectionRef.document(doctorId).update(KEY_CURRENT_PATIENT, patientSession).await()
+        patientSession?.let { sendNotificationNewUserSession(it.username) }
         emit(DataState.success())
     }.catch {
         Timber.tag(APP_DEBUG).e("MainRepository: startPatientSessionForDoctor: Exception = $it")
@@ -196,5 +205,22 @@ constructor(
         emit(DataState.error(Response(it.message.toString(), ResponseType.Dialog)))
     }.flowOn(IO)
 
+
+    private fun sendNotificationNewUserSession(username: String) {
+        val notification =  PushNotification(
+                data = NotificationData("MoveoHealth", "$username session has started"),
+                to = TOPIC
+        )
+        CoroutineScope(IO).launch {
+            try {
+                Timber.tag(APP_DEBUG).e("MainRepository: sendNotification: executing web request..")
+                val response = notificationAPI.postNotification(notification).also {
+                    Timber.tag(APP_DEBUG).e("MainRepository: sendNotification: response = $it")
+                }
+            } catch (e: Exception) {
+                Timber.tag(APP_DEBUG).e("MainRepository: sendNotification: Exception = ${e.message}")
+            }
+        }
+    }
 
 }

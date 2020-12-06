@@ -3,6 +3,7 @@ package com.example.moveohealth.ui.main
 import androidx.hilt.Assisted
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
+import androidx.lifecycle.switchMap
 import com.example.moveohealth.constants.Constants.Companion.APP_DEBUG
 import com.example.moveohealth.model.User
 import com.example.moveohealth.model.UserType
@@ -14,9 +15,7 @@ import com.example.moveohealth.ui.Loading
 import com.example.moveohealth.ui.main.state.MainStateEvent
 import com.example.moveohealth.ui.main.state.MainStateEvent.*
 import com.example.moveohealth.ui.main.state.MainViewState
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -32,32 +31,24 @@ constructor(
     val userType: LiveData<UserType>
         get() = _userType
 
-    private val _isFilteredDoctors = MutableLiveData(true)
-    val isFilteredDoctors: LiveData<Boolean>
-        get() = _isFilteredDoctors
 
+    val isFilteredDoctors: LiveData<Boolean> = sessionManager.isFilteredDoctors.asLiveData()
 
     init {
         _userType.value = sessionManager.cachedUser.value?.userType
-
-        viewModelScope.launch {
-            sessionManager.isFilteredDoctors.collect {
-                _isFilteredDoctors.value = it
-            }
-        }
     }
-
-    fun getIsSortDoctors(): Boolean? = isFilteredDoctors.value
 
     fun toggleSort() {
         sessionManager.toggleSort()
     }
-    val doctorList: LiveData<List<User>?> = isFilteredDoctors.switchMap { filter ->
-        mainRepository
-            .listenAllDoctorsList(filter)
-            .distinctUntilChanged()
-            .asLiveData()
-    }
+    val doctorList: LiveData<List<User>?> = sessionManager.isFilteredDoctors
+        .flatMapLatest {
+            Timber.tag(APP_DEBUG).e("MainViewModel: isFilteredDoctors.switchMap...")
+            mainRepository
+                .listenAllDoctorsList(it)
+                .distinctUntilChanged()
+        }.asLiveData()
+
 
     fun listenToUserChanges(): Flow<User?> {
         return mainRepository.listenToCurrentUserChanges()

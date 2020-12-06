@@ -12,6 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import com.example.moveohealth.R
 import com.example.moveohealth.constants.Constants.Companion.APP_DEBUG
+import com.example.moveohealth.constants.Constants.Companion.TOPIC
 import com.example.moveohealth.databinding.ActivityMainBinding
 import com.example.moveohealth.model.User
 import com.example.moveohealth.model.UserType
@@ -19,6 +20,7 @@ import com.example.moveohealth.ui.BaseActivity
 import com.example.moveohealth.ui.auth.AuthActivity
 import com.example.moveohealth.ui.main.doctor.DoctorFragment
 import com.example.moveohealth.ui.main.state.MainStateEvent.UpdateChangeUserType
+import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
@@ -41,6 +43,9 @@ class MainActivity : BaseActivity() {
         setSupportActionBar(binding.toolbar)
         setClickListeners()
         subscribeObservers()
+
+        // in order to send to specific device we need to send it to token and not topic.
+        FirebaseMessaging.getInstance().subscribeToTopic(TOPIC)
     }
 
     override fun onStart() {
@@ -176,6 +181,12 @@ class MainActivity : BaseActivity() {
     override fun onStop() {
         job.cancel()
         super.onStop()
+    }
+
+    override fun onDestroy() {
+        Timber.tag(APP_DEBUG).d("MainActivity: onDestroy: ")
+        FirebaseMessaging.getInstance().unsubscribeFromTopic(TOPIC)
+        super.onDestroy()
     }
 
 

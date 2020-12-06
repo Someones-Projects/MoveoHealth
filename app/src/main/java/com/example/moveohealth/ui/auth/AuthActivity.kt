@@ -32,6 +32,7 @@ class AuthActivity: BaseActivity() {
         onRestoreInstanceState()
         subscribeObservers()
         sessionManager.checkPreviousAuthUser()
+
     }
 
     private fun onRestoreInstanceState() {
